@@ -1,24 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Barcode Price Tracker
+
+A simple, efficient, and user-friendly web application that empowers users to quickly retrieve product details by entering a barcode.
+
+## Features
+
+- Manual barcode input with validation
+- Real-time product information lookup
+- Responsive design for all devices
+- Error handling and user feedback
+- Performance optimized
+
+## Tech Stack
+
+- Next.js with TypeScript
+- Tailwind CSS for styling
+- ESLint & Prettier for code quality
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file with required environment variables
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Development
+
+- `npm run dev` - Start development server
+- `npm run build` - Build production version
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+
+## Project Structure
+
+```
+src/
+  ├── app/           # Next.js app router pages
+  ├── components/    # Reusable React components
+  ├── utils/         # Utility functions
+  ├── types/         # TypeScript type definitions
+  ├── hooks/         # Custom React hooks
+  ├── styles/        # Global styles
+  └── lib/           # External library configurations
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_API_URL` - API endpoint URL
+- `NEXT_PUBLIC_APP_NAME` - Application name
+- `API_TIMEOUT` - API request timeout in milliseconds
 
 ## Learn More
 

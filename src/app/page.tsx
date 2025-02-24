@@ -1,101 +1,124 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Layout from '@/components/templates/Layout';
+import BarcodeInput from '@/components/molecules/BarcodeInput';
+import ProductDisplay from '@/components/molecules/ProductDisplay';
+import ErrorMessage from '@/components/atoms/ErrorMessage';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useProduct } from '@/hooks/useProduct';
+
+// Route segment config
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+export const preferredRegion = 'auto';
+
+function LoadingFallback() {
+  return (
+    <div className="w-full max-w-md animate-pulse">
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-2 h-8 w-48 rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="mx-auto h-4 w-64 rounded bg-gray-200 dark:bg-gray-700" />
+      </div>
+      <div className="space-y-4">
+        <div className="h-12 w-full rounded bg-gray-200 dark:bg-gray-700" />
+        <div className="h-12 w-full rounded bg-gray-200 dark:bg-gray-700" />
+      </div>
+    </div>
+  );
+}
+
+function HomeContent() {
+  const { product, error, isLoading, lookupProduct, reset } = useProduct();
+  const [hasSearched, setHasSearched] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Handle initial barcode from URL
+  useEffect(() => {
+    const barcode = searchParams.get('barcode');
+    if (barcode && !hasSearched) {
+      handleSubmit(barcode);
+    }
+  }, [searchParams]);
+
+  const handleSubmit = async (barcode: string) => {
+    setHasSearched(true);
+    // Update URL with barcode
+    router.push(`/?barcode=${barcode}`);
+    await lookupProduct(barcode);
+  };
+
+  const handleSearchAgain = () => {
+    setHasSearched(false);
+    reset();
+    // Remove barcode from URL
+    router.push('/');
+  };
+
+  return (
+    <div className="flex min-h-[calc(100vh-16rem)] w-full flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h2 className="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Barcode Price Lookup
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Enter a barcode to find product details and pricing
+          </p>
+        </div>
+
+        {!hasSearched || (!product && !error) ? (
+          <BarcodeInput onSubmit={handleSubmit} isLoading={isLoading} />
+        ) : error ? (
+          <div className="space-y-4">
+            <ErrorMessage message={error} onRetry={handleSearchAgain} />
+          </div>
+        ) : (
+          product && (
+            <ProductDisplay
+              product={product}
+              onSearchAgain={handleSearchAgain}
+            />
+          )
+        )}
+
+        {/* Sample barcodes for testing */}
+        {!hasSearched && (
+          <div className="mt-8 text-center">
+            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+              Try these sample barcodes:
+            </p>
+            <div className="space-x-4">
+              <button
+                onClick={() => handleSubmit('12345678')}
+                className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium"
+              >
+                12345678
+              </button>
+              <button
+                onClick={() => handleSubmit('87654321')}
+                className="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium"
+              >
+                87654321
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <Layout>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <HomeContent />
+        </Suspense>
+      </ErrorBoundary>
+    </Layout>
   );
 }
